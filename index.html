@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luca Baldiviezo - Builder</title>
+    <!-- Tailwind CSS v4 -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..750;1,400..750&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-serif-elegant { font-family: 'Lora', serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes floatAvatar { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        .animate-float { animation: floatAvatar 4s ease-in-out infinite; }
+        @keyframes modalEntrance { from { opacity: 0; transform: scale(0.96) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .animate-modal { animation: modalEntrance 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    </style>
+</head>
+<body class="bg-zinc-950 text-slate-200 min-h-screen flex flex-col items-center justify-center relative overflow-hidden select-none">
+
+    <!-- Contenido Principal de la Página de Fondo -->
+    <div class="text-center p-6 z-10">
+        <h1 class="text-4xl font-bold mb-2 tracking-tight">Luca Baldiviezo</h1>
+        <p class="text-zinc-500 text-sm">Desarrollo sistemas fullstack e integro IA donde tiene sentido.</p>
+        <button id="btn-open-command" class="mt-6 px-5 py-2.5 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-white rounded-xl text-sm transition-all duration-200 flex items-center gap-2 mx-auto cursor-pointer shadow-lg">
+            <i data-lucide="message-square" class="w-4 h-4"></i>
+            <span>Hablar con la IA</span>
+        </button>
+    </div>
+
+    <!-- COMMAND PANEL ESTILO PREMIUM -->
+    <div id="command-overlay" class="hidden fixed inset-0 bg-black/60 backdrop-blur-xl z-50 flex items-center justify-center p-4">
+        <div id="command-panel" class="bg-[#121214] w-full max-w-xl h-[560px] rounded-[28px] shadow-[0_30px_80px_rgba(0,0,0,0.8)] border border-zinc-800/60 flex flex-col overflow-hidden opacity-0 scale-95 transition-all duration-300">
+            
+            <!-- Encabezado superior mini -->
+            <div class="p-4 px-5 flex justify-between items-center bg-transparent">
+                <div class="flex items-center gap-1.5 opacity-60">
+                    <div class="w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
+                    <span class="text-[10px] font-mono tracking-wider uppercase text-zinc-400">LucAI</span>
+                </div>
+                <div class="flex items-center gap-1 text-zinc-500">
+                    <button id="btn-reset-chat" title="Reiniciar chat" class="hover:text-zinc-300 p-1.5 rounded-lg hover:bg-zinc-900 transition cursor-pointer">
+                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <button id="btn-close-command" title="Cerrar (Esc)" class="hover:text-zinc-300 p-1.5 rounded-lg hover:bg-zinc-900 transition cursor-pointer">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Contenido Principal Centralizado -->
+            <div id="chat-messages" class="flex-1 overflow-y-auto px-6 pb-4 no-scrollbar flex flex-col justify-between">
+                
+                <!-- VISTA INICIAL -->
+                <div id="chat-welcome" class="flex-1 flex flex-col items-center justify-center text-center my-auto transition-all duration-300">
+                    <div class="mb-4 animate-float relative flex items-center justify-center w-14 h-14 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-inner">
+                        <i data-lucide="bot" class="w-7 h-7 text-red-400/90"></i>
+                    </div>
+                    <h2 class="text-3xl font-serif-elegant font-medium text-white mb-1.5 tracking-wide">Hola!, ¿Cómo estás?</h2>
+                    <p class="text-zinc-400 text-xs font-medium mb-6">Preguntame lo que quieras sobre Luca</p>
+                    
+                    <!-- Botones encapsulados -->
+                    <div class="w-full max-w-md space-y-2">
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="enviarSugerencia('¿Quién es Luca?')" class="py-2.5 px-3 bg-[#18181b]/60 hover:bg-[#1f1f23] border border-zinc-800/50 rounded-xl text-xs text-zinc-300 font-medium transition duration-200 cursor-pointer flex items-center justify-center gap-2 shadow-sm">
+                                <i data-lucide="user" class="w-3.5 h-3.5 text-zinc-500"></i> ¿Quién es Luca?
+                            </button>
+                            <button onclick="enviarSugerencia('¿Qué proyectos tiene?')" class="py-2.5 px-3 bg-[#18181b]/60 hover:bg-[#1f1f23] border border-zinc-800/50 rounded-xl text-xs text-zinc-300 font-medium transition duration-200 cursor-pointer flex items-center justify-center gap-2 shadow-sm">
+                                <i data-lucide="folder" class="w-3.5 h-3.5 text-zinc-500"></i> ¿Qué proyectos tiene?
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="enviarSugerencia('¿Qué tecnologías usa?')" class="py-2.5 px-3 bg-[#18181b]/60 hover:bg-[#1f1f23] border border-zinc-800/50 rounded-xl text-xs text-zinc-300 font-medium transition duration-200 cursor-pointer flex items-center justify-center gap-2 shadow-sm">
+                                <i data-lucide="code" class="w-3.5 h-3.5 text-zinc-500"></i> ¿Qué tecnologías usa?
+                            </button>
+                            <button onclick="enviarSugerencia('Hablame sobre su educación')" class="py-2.5 px-3 bg-[#18181b]/60 hover:bg-[#1f1f23] border border-zinc-800/50 rounded-xl text-xs text-zinc-300 font-medium transition duration-200 cursor-pointer flex items-center justify-center gap-2 shadow-sm">
+                                <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-zinc-500"></i> Hablame sobre su educación
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="enviarSugerencia('Activar modo reclutador')" class="py-2.5 px-3 bg-[#18181b]/60 hover:bg-[#1f1f23] border border-zinc-800/50 rounded-xl text-xs text-zinc-300 font-medium transition duration-200 cursor-pointer flex items-center justify-center gap-2 shadow-sm">
+                                <i data-lucide="briefcase" class="w-3.5 h-3.5 text-zinc-500"></i> Modo reclutador
+                            </button>
+                            <button onclick="chatInput.focus()" class="py-2.5 px-3 bg-[#18181b]/60 hover:bg-[#1f1f23] border border-zinc-800/50 rounded-xl text-xs text-zinc-300 font-medium transition duration-200 cursor-pointer flex items-center justify-center gap-2 shadow-sm">
+                                <i data-lucide="send" class="w-3.5 h-3.5 text-zinc-500"></i> Enviar mensaje
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historial Dinámico -->
+                <div id="dynamic-messages" class="space-y-4 pt-2 hidden w-full"></div>
+
+                <!-- Indicador de Carga -->
+                <div id="loading-indicator" class="hidden flex justify-start pt-2">
+                    <div class="bg-zinc-900 border border-zinc-800/80 px-4 py-2.5 rounded-2xl text-zinc-400 text-xs flex items-center gap-1.5 shadow-sm">
+                        <span class="flex gap-1">
+                            <span class="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style="animation-delay: 0ms"></span>
+                            <span class="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style="animation-delay: 150ms"></span>
+                            <span class="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style="animation-delay: 300ms"></span>
+                        </span>
+                        <span class="ml-1 text-zinc-500 font-medium">Procesando...</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- BARRA DE ENTRADA INFERIOR -->
+            <div class="p-4 px-6 bg-transparent">
+                <form id="chat-form" class="flex items-center gap-2 bg-[#1c1c1f] border border-zinc-800/80 rounded-2xl px-4 py-3 focus-within:border-zinc-700/80 focus-within:bg-[#222226] transition-all duration-200 shadow-inner">
+                    <input
+                        id="chat-input"
+                        type="text"
+                        placeholder="¿Cuál es tu duda?"
+                        autocomplete="off"
+                        class="bg-transparent flex-1 outline-none text-sm text-white placeholder-zinc-500 w-full font-medium"
+                    />
+                    <button type="submit" class="w-7 h-7 bg-zinc-800 hover:bg-zinc-700 hover:text-white text-zinc-400 rounded-full flex items-center justify-center transition cursor-pointer" title="Enviar">
+                        <i data-lucide="arrow-up" class="w-4 h-4"></i>
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const btnOpenCommand = document.getElementById('btn-open-command');
+        const btnCloseCommand = document.getElementById('btn-close-command');
+        const btnResetChat = document.getElementById('btn-reset-chat');
+        const commandOverlay = document.getElementById('command-overlay');
+        const commandPanel = document.getElementById('command-panel');
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const dynamicMessages = document.getElementById('dynamic-messages');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const chatMessagesArea = document.getElementById('chat-messages');
+        const chatWelcome = document.getElementById('chat-welcome');
+
+        // ⚠️ PEGA TU CLAVE DE GEMINI AQUÍ ABAJO PARA QUE LA IA RESPONDA TODO LO DEMÁS
+        const GEMINI_API_KEY = ""; 
+        const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+        let escribiendoEfecto = false;
+
+        // BANCO DE RESPUESTAS LOCALES (Inmediatas y prioritarias)
+        const RESPUESTAS_LOCALES = {
+            "contacto": "Podés contactar a Luca a través de su correo electrónico o redes sociales si activás el Modo Reclutador.",
+            "hola": "¡Hola! ¿Cómo estás? Contame, ¿en qué te puedo ayudar hoy respecto a Luca?",
+            "cv": "Luca preparó su CV orientado al sector de Programación e Inteligencia Artificial.",
+            "luca me ama?": "Eso depende, ¿te llamás Jazmin Villafañes? Si es así entonces sí y mucho, solo habla de vos el boludo.",
+            "quien es jazmin?": "Jazmin Villafañes es el amor de la vida de Luca, la futura esposa y futura madre de los hijos de él.",
+            "hobbie": "En sus tiempos libres, a Luca le interesa mucho el fútbol, el arte del tatuaje y está enfocado con la programación en Python enfocada en IA.",
+            "secreto": "Encontraste un comando oculto. Luca es conocido por algunos como 'El ángel caído' debido a sus grandes capacidades.",
+            "¿quién es luca?": "Luca Baldiviezo es un desarrollador enfocado en sistemas fullstack y en integrar Inteligencia Artificial en proyectos donde realmente aporta valor.",
+            "¿qué proyectos tiene?": "Luca cuenta con varios proyectos en su portafolio, incluyendo este mismo asistente inteligente (LucAI), calculadoras funcionales en Python y sistemas de automatización.",
+            "¿qué tecnologías usa?": "Domina principalmente Python enfocado en IA, JavaScript, HTML, CSS, Tailwind CSS para interfaces modernas y herramientas de desarrollo backend.",
+            "hablame sobre su educación": "Luca se encuentra en constante formación autodidacta y guiada, especializándose en lógica de programación, inteligencia artificial y optimización de software.",
+            "activar modo reclutador": "¡Modo Reclutador Activo! Luca está disponible para puestos en desarrollo de software o roles de atención al cliente y reposición. Podés contactarlo para agendar una entrevista."
+        };
+
+        // Contexto que se le envía a la IA para que simule ser tu asistente real
+        const CONTEXTO_ASISTENTE = "Sos LucAI, el asistente virtual inteligente de Luca Baldiviezo. Tu propósito es responder dudas sobre Luca (su carrera, habilidades, gustos) de forma amable, profesional, concisa y con un toque tecnológico moderno. Si te preguntan algo ajeno a Luca, responde amablemente vinculándolo con él o aclarando tu rol.";
+
+        function abrirPanel() {
+            commandOverlay.classList.remove('hidden');
+            setTimeout(() => {
+                commandPanel.classList.remove('opacity-0', 'scale-95');
+                commandPanel.classList.add('opacity-100', 'scale-100', 'animate-modal');
+                chatInput.focus();
+            }, 10);
+        }
+
+        function cerrarPanel() {
+            commandPanel.classList.remove('opacity-100', 'scale-100', 'animate-modal');
+            commandPanel.classList.add('opacity-0', 'scale-95');
+            setTimeout(() => {
+                commandOverlay.classList.add('hidden');
+            }, 250);
+        }
+
+        btnOpenCommand.addEventListener('click', abrirPanel);
+        btnCloseCommand.addEventListener('click', cerrarPanel);
+        commandOverlay.addEventListener('click', (e) => { if (e.target === commandOverlay) cerrarPanel(); });
+
+        window.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
+                commandOverlay.classList.contains('hidden') ? abrirPanel() : cerrarPanel();
+            }
+            if (e.key === 'Escape' && !commandOverlay.classList.contains('hidden')) cerrarPanel();
+        });
+
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (escribiendoEfecto) return;
+            const mensaje = chatInput.value.trim();
+            if (mensaje) {
+                procesarEnvio(mensaje);
+                chatInput.value = '';
+            }
+        });
+
+        function enviarSugerencia(texto) {
+            if (escribiendoEfecto) return;
+            procesarEnvio(texto);
+        }
+
+        async function procesarEnvio(texto) {
+            if (!chatWelcome.classList.contains('hidden')) {
+                chatWelcome.classList.add('hidden');
+                dynamicMessages.classList.remove('hidden');
+            }
+
+            agregarMensajeHTML(texto, 'usuario');
+            loadingIndicator.classList.remove('hidden');
+            scrollAlFinal();
+
+            const textoNormalizado = texto.toLowerCase().trim();
+            let respuestaBot = null;
+
+            // 1. Buscar coincidencia exacta en las respuestas locales configuradas
+            for (const clave in RESPUESTAS_LOCALES) {
+                if (textoNormalizado.includes(clave)) {
+                    respuestaBot = RESPUESTAS_LOCALES[clave];
+                    break; 
+                }
+            }
+
+            try {
+                if (respuestaBot) {
+                    await new Promise(resolve => setTimeout(resolve, 450));
+                } else {
+                    // 2. Si no es una respuesta fija, consulta directamente a la API de Google Gemini en vivo
+                    if (GEMINI_API_KEY === "TU_GEMINI_API_KEY_AQUÍ") {
+                        respuestaBot = "Hola! Para habilitar todas las respuestas dinámicas de la IA, recordá colocar tu API Key de Gemini en el código del archivo HTML.";
+                    } else {
+                        const response = await fetch(GEMINI_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                contents: [{
+                                    parts: [{ text: `${CONTEXTO_ASISTENTE}\n\nPregunta del usuario: ${texto}` }]
+                                }]
+                            })
+                        });
+                        const data = await response.json();
+                        respuestaBot = data.candidates[0].content.parts[0].text || "No pude procesar una respuesta en este momento.";
+                    }
+                }
+                
+                loadingIndicator.classList.add('hidden');
+                await agregarMensajeEfectoMaquina(respuestaBot);
+
+            } catch (error) {
+                console.error(error);
+                loadingIndicator.classList.add('hidden');
+                agregarMensajeHTML("Hubo un error al conectar con el servicio de IA en la nube.", 'asistente');
+            } finally {
+                scrollAlFinal();
+            }
+        }
+
+        function agregarMensajeHTML(texto, remitente) {
+            const wrapper = crearContenedorMensaje(remitente);
+            wrapper.querySelector('.bubble-text').textContent = texto;
+            dynamicMessages.appendChild(wrapper);
+            scrollAlFinal();
+        }
+
+        function crearContenedorMensaje(remitente) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex flex-col ${remitente === 'usuario' ? 'items-end' : 'items-start'} space-y-1`;
+
+            const label = document.createElement('span');
+            label.className = `text-[10px] font-bold uppercase tracking-wider px-1 ${remitente === 'usuario' ? 'text-zinc-600' : 'text-red-400/80'}`;
+            label.textContent = remitente === 'usuario' ? 'Vos' : 'Asistente';
+            wrapper.appendChild(label);
+
+            const bubble = document.createElement('div');
+            bubble.className = `bubble-text max-w-[85%] p-3.5 rounded-2xl text-sm leading-relaxed ${
+                remitente === 'usuario' 
+                    ? 'bg-zinc-800 text-white font-medium' 
+                    : 'bg-zinc-900 border border-zinc-800 text-zinc-200 whitespace-pre-line'
+            }`;
+            
+            wrapper.appendChild(bubble);
+            return wrapper;
+        }
+
+        function agregarMensajeEfectoMaquina(texto) {
+            return new Promise((resolve) => {
+                escribiendoEfecto = true;
+                const wrapper = crearContenedorMensaje('asistente');
+                const bubble = wrapper.querySelector('.bubble-text');
+                dynamicMessages.appendChild(wrapper);
+
+                let i = 0;
+                function tipear() {
+                    if (i < texto.length) {
+                        bubble.textContent += texto.charAt(i);
+                        i++;
+                        scrollAlFinal();
+                        const pausa = texto.charAt(i-1) === '.' || texto.charAt(i-1) === ',' ? 150 : 12;
+                        setTimeout(tipear, pausa);
+                    } else {
+                        escribiendoEfecto = false;
+                        resolve();
+                    }
+                }
+                tipear();
+            });
+        }
+
+        btnResetChat.addEventListener('click', () => {
+            if (escribiendoEfecto) return;
+            dynamicMessages.innerHTML = '';
+            dynamicMessages.classList.add('hidden');
+            loadingIndicator.classList.add('hidden');
+            chatWelcome.classList.remove('hidden');
+            chatInput.value = '';
+            chatInput.focus();
+        });
+
+        function scrollAlFinal() {
+            chatMessagesArea.scrollTo({ top: chatMessagesArea.scrollHeight, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
